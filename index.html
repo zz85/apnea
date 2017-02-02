@@ -10,6 +10,14 @@
 
 	div {
 		font-size: 120px;
+		text-align: center;
+	}
+
+	canvas {
+		position: absolute;
+		z-index: 2;
+		top: 0;
+		left: 0;
 	}
 	</style>
 
@@ -57,13 +65,19 @@
 	<button onclick="start()">Start</button>
 	<button onclick="stop()">Stop</button>
 
+	<div id="reps" style="color: yellowgreen"></div>
+	<div id="durationLabel" style="color: greenyellow"></div>
 	<div id="elapsed"></div>
+	
 	<div id="statusLabel" style="color: yellow"></div>
 	<div id="remaining" style="color: red"></div>
-	<div id="reps" style="color: yellowgreen"></div>
 	
 
 	<script>
+		history = [
+			{"time":1486052070298,"hold":45,"rest":15,"reptitions":10},
+		]
+
 		started = -1;
 		marker = -1;
 		currentReps = 0;
@@ -74,6 +88,18 @@
 		// hold / static 
 
 		statusLabel = document.getElementById('statusLabel');
+
+		initCanvas();
+		start();
+
+		function initCanvas() {
+			canvas = document.createElement('canvas');
+			document.body.appendChild(canvas);
+			canvas.width = 800;
+			canvas.height = 800;
+
+			ctx = canvas.getContext('2d');
+		}
 
 		function start() {
 			static_ms = static.value * 1000;
@@ -88,7 +114,11 @@
 			// marker = started;
 			// ending = started + static_ms;
 
-			setInterval(interval, 50);
+			setInterval(interval, 15);
+		}
+
+		function stop() {
+			// TODO
 		}
 
 		function interval() {
@@ -97,32 +127,50 @@
 			if (now >= ending) {
 				marker = ending;
 				if (mode !== 'hold') {
-					ending = marker + static_ms;
+					currentDuration = static_ms;
 					mode = 'hold';
 					currentReps++;
 				}
 				else {
-					ending = marker + recovery_ms;
+					currentDuration = recovery_ms;
 					mode = 'rest';
 				}
+				
+				ending = marker + currentDuration;
 			}
 
 			lapse = now - marker;
 			left = ending - now;
 			
+			durationLabel.innerHTML = format(currentDuration)
 			elapsed.innerHTML = format(lapse);
 			remaining.innerHTML = format(left);
 			statusLabel.innerHTML = mode;
-			reps.innerHTML = currentReps;
+			reps.innerHTML = 'Round ' + currentReps;
+
+			// update canvas
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			ctx.beginPath();
+			ctx.lineWidth = 20;
+			ARC_OFFSET = - Math.PI / 2;
+
+			ctx.strokeStyle = '#222';
+			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 + ARC_OFFSET, false);
+			ctx.stroke();
+
+			ctx.beginPath();
+			ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
+			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 * lapse / currentDuration + ARC_OFFSET, false);
+			ctx.stroke();
 		}
 
 		function format(lapse) {
-			const ms = '.' + (lapse % 1000 / 10 | 0);
+			const ms = '.' + (lapse % 1000 / 100 | 0);
 			const total_s = lapse / 1000 | 0;
 			const s = total_s % 60;
 			const min = total_s / 60 | 0;
 
-			return `${pad(min)}:${pad(s)}${ms}`;
+			return `${pad(min, 1)}:${pad(s)}${ms}`;
 		}
 
 		function pad(value, digits=2) {
