@@ -10,22 +10,48 @@
 
 	div {
 		font-size: 120px;
-		
 	}
 	</style>
-	Static Interval
+
+	<!--
+		TODOs
+
+		- Historic data (Tables)
+		- Visualizations (bar / donut chart)
+		- Make CO2 Tables
+		- Apnea CO2/O2 Plans
+		- Max Hold
+			- Contraction Meter
+	-->
+	
+	Hold Duration:
 	<select id="static">
 		<option value="5">0:05</option>
 		<option value="30">0:30</option>
-		<option value="45">0:45</option>
+		<option value="45" selected>0:45</option>
 		<option value="60">1:00</option>
 	<select>
 
+	Rest Duration: 
 	<select id="recovery">
 		<option value="15">0:15</option>
 		<option value="30">0:30</option>
 		<option value="45">0:45</option>
 		<option value="60">1:00</option>
+	</select>
+
+	Repetitions:
+	<select id="reptitions">
+		<option value="1">1</option>
+		<option value="2">2</option>
+		<option value="3">3</option>
+		<option value="4">4</option>
+		<option value="5">5</option>
+		<option value="6">6</option>
+		<option value="7">7</option>
+		<option value="8">8</option>
+		<option value="9">9</option>
+		<option value="10">10</option>
 	</select>
 
 	<button onclick="start()">Start</button>
@@ -34,14 +60,18 @@
 	<div id="elapsed"></div>
 	<div id="statusLabel" style="color: yellow"></div>
 	<div id="remaining" style="color: red"></div>
+	<div id="reps" style="color: yellowgreen"></div>
 	
 
 	<script>
 		started = -1;
 		marker = -1;
+		currentReps = 0;
 		
 		events = [];
-		mode = null;
+		mode = 'hold';
+		// breath / relax / rest
+		// hold / static 
 
 		statusLabel = document.getElementById('statusLabel');
 
@@ -49,13 +79,14 @@
 			static_ms = static.value * 1000;
 			recovery_ms = recovery.value * 1000;
 			started = Date.now();
+			ending = started;
 			events.push({
 				type: 'started',
 				time: started
 			});
 
-			marker = started;
-			ending = started + static_ms;
+			// marker = started;
+			// ending = started + static_ms;
 
 			setInterval(interval, 50);
 		}
@@ -65,13 +96,14 @@
 
 			if (now >= ending) {
 				marker = ending;
-				if (mode !== 'static') {
+				if (mode !== 'hold') {
 					ending = marker + static_ms;
-					mode = 'static';
+					mode = 'hold';
+					currentReps++;
 				}
 				else {
 					ending = marker + recovery_ms;
-					mode = 'recovery';
+					mode = 'rest';
 				}
 			}
 
@@ -81,7 +113,7 @@
 			elapsed.innerHTML = format(lapse);
 			remaining.innerHTML = format(left);
 			statusLabel.innerHTML = mode;
-		
+			reps.innerHTML = currentReps;
 		}
 
 		function format(lapse) {
