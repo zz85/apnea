@@ -5,6 +5,10 @@
 		font-family: monospace;
 		font-size: 24px;
 	}
+
+	div {
+		font-size: 70px;
+	}
 	</style>
 	Static Interval
 	<select id="static">
@@ -21,6 +25,7 @@
 	</select>
 
 	<button onclick="start()">Start</button>
+	<button onclick="stop()">Stop</button>
 
 	<div id="elapsed"></div>
 	<div id="remaining"></div>
@@ -32,19 +37,34 @@
 			static_ms = static.value * 1000;
 			recovery_ms = recovery.value * 1000;
 			started = Date.now();
+			ending = started + static_ms;
+
 			setInterval(interval, 50);
 		}
 
 		function interval() {
-			now = Date.now();
+			const now = Date.now();
 			lapse = now - started;
-			ms = lapse % 1000 / 10 | 0;
-			total_s = lapse / 1000 | 0;
-			s = total_s % 60;
-
-			elapsed.innerHTML = `${s}.${ms}`;
+			left = ending - now;
+			
+			elapsed.innerHTML = format(lapse);
+			remaining.innerHTML = format(left);
 			
 			// if (now - started > static_ms
+		}
+
+		function format(lapse) {
+			const ms = lapse % 1000 / 10 | 0;
+			const total_s = lapse / 1000 | 0;
+			const s = total_s % 60;
+			const min = total_s / 60 | 0;
+
+			return `${pad(min)}:${pad(s)}.${ms}`;
+		}
+
+		function pad(value, digits=2) {
+			const string = value + '';
+			return Array(Math.max(digits - string.length,0)).fill('0').join('') + string;
 		}
 	</script>
 </body>
