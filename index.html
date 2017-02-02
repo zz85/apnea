@@ -26,7 +26,25 @@
 	<div id="remaining"></div>
 
 	<script>
+		started = -1;
+		marker = -1;
 		function start() {
+			static_ms = static.value * 1000;
+			recovery_ms = recovery.value * 1000;
+			started = Date.now();
+			setInterval(interval, 50);
+		}
+
+		function interval() {
+			now = Date.now();
+			lapse = now - started;
+			ms = lapse % 1000 / 10 | 0;
+			total_s = lapse / 1000 | 0;
+			s = total_s % 60;
+
+			elapsed.innerHTML = `${s}.${ms}`;
+			
+			// if (now - started > static_ms
 		}
 	</script>
 </body>
