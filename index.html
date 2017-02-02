@@ -4,14 +4,18 @@
 	body {
 		font-family: monospace;
 		font-size: 24px;
+		background: #333;
+		color: #eee;
 	}
 
 	div {
-		font-size: 70px;
+		font-size: 120px;
+		
 	}
 	</style>
 	Static Interval
 	<select id="static">
+		<option value="5">0:05</option>
 		<option value="30">0:30</option>
 		<option value="45">0:45</option>
 		<option value="60">1:00</option>
@@ -28,15 +32,29 @@
 	<button onclick="stop()">Stop</button>
 
 	<div id="elapsed"></div>
-	<div id="remaining"></div>
+	<div id="statusLabel" style="color: yellow"></div>
+	<div id="remaining" style="color: red"></div>
+	
 
 	<script>
 		started = -1;
 		marker = -1;
+		
+		events = [];
+		mode = null;
+
+		statusLabel = document.getElementById('statusLabel');
+
 		function start() {
 			static_ms = static.value * 1000;
 			recovery_ms = recovery.value * 1000;
 			started = Date.now();
+			events.push({
+				type: 'started',
+				time: started
+			});
+
+			marker = started;
 			ending = started + static_ms;
 
 			setInterval(interval, 50);
@@ -44,22 +62,35 @@
 
 		function interval() {
 			const now = Date.now();
-			lapse = now - started;
+
+			if (now >= ending) {
+				marker = ending;
+				if (mode !== 'static') {
+					ending = marker + static_ms;
+					mode = 'static';
+				}
+				else {
+					ending = marker + recovery_ms;
+					mode = 'recovery';
+				}
+			}
+
+			lapse = now - marker;
 			left = ending - now;
 			
 			elapsed.innerHTML = format(lapse);
 			remaining.innerHTML = format(left);
-			
-			// if (now - started > static_ms
+			statusLabel.innerHTML = mode;
+		
 		}
 
 		function format(lapse) {
-			const ms = lapse % 1000 / 10 | 0;
+			const ms = '.' + (lapse % 1000 / 10 | 0);
 			const total_s = lapse / 1000 | 0;
 			const s = total_s % 60;
 			const min = total_s / 60 | 0;
 
-			return `${pad(min)}:${pad(s)}.${ms}`;
+			return `${pad(min)}:${pad(s)}${ms}`;
 		}
 
 		function pad(value, digits=2) {
