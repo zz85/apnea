@@ -9,7 +9,7 @@
 	}
 
 	div {
-		font-size: 120px;
+		font-size: 40px;
 		text-align: center;
 	}
 
@@ -41,17 +41,15 @@
 		TODO add touch support
 	-->
 
-	Max Hold
-	<button onclick="start()">Start</button>
-	<button onclick="stop()">Stop</button>
+	
+	<!--<button onclick="start()">Start</button>
+	<button onclick="stop()">Stop</button>-->
 
-	<div id="reps" style="color: yellowgreen"></div>
-	<div id="durationLabel" style="color: greenyellow"></div>
-	<div id="elapsed"></div>
-
-	<div id="statusLabel" style="color: yellow"></div>
-	<div id="remaining" style="color: red"></div>
-
+	<div id="info" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column;">
+		<div id="reps" style="color: yellowgreen">Max Hold</div>
+		<div id="statusLabel" style="color: yellow">Hit Enter to Start / Stop</div>
+		<div id="remaining" style="color: red">Tap Space for Contractions</div>
+	</div>
 
 	<script>
 		history = [
@@ -68,6 +66,7 @@
 		statusLabel = document.getElementById('statusLabel');
 
 		initCanvas();
+		setInterval(interval, 15);
 
 		function initCanvas() {
 			canvas = document.createElement('canvas');
@@ -153,7 +152,7 @@
 				time: started
 			});
 
-			setInterval(interval, 15);
+			info.style.display = 'none';
 		}
 
 		function stop() {
@@ -181,8 +180,7 @@
 
 		function interval() {
 			const now = Date.now();
-			if (started < 0) return;
-
+			
 			time = now - started
 			seconds = time / 1000 % 60;
 
@@ -190,22 +188,28 @@
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			ctx.beginPath();
 
-			// durationLabel.innerHTML = format(time)
-			label(format(time));
-
 			ctx.strokeStyle = '#222';
 			ring(350, 1);
 
+			if (started < 0) return;
+
 			ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
 			ring(350, seconds / 60);
+
+			// durationLabel.innerHTML = format(time)
+			label(format(time));
+
+
 		}
 
 		function label(text) {
 			// var text = ctx.measureText('foo'); // TextMetrics object
 			// text.width; // 16;
 			ctx.font = '120px monospace';
-			ctx.fillStyle = 'greenyellow'
-			ctx.fillText(text, 0, canvas.height / 2);
+			ctx.fillStyle = 'greenyellow';
+			ctx.textAlign = 'center';
+			ctx.textBaseline = 'middle'; // "top" || "hanging" || "middle" || "alphabetic" || "ideographic" || "bottom";
+			ctx.fillText(text, canvas.width / 2, canvas.height / 2);
 		}
 
 		function ring(radius, t) {
