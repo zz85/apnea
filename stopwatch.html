@@ -24,16 +24,23 @@
 	<!--
 		TODOs
 
-		- Historic data (Tables)
-		- Visualizations (bar / donut chart)
-		- Make CO2 Tables
-		- Apnea CO2/O2 Plans
-		- Max Hold
-			- Contraction Meter
-		- Audio alerts
-		- Vibrations
+		centeralign timing.
+		count contractions.
+		visualize contractions.
+
+		put all events into a stream,
+		reduce that.
+		if needed, optimize.
+
+		stream vs imperative
+		- imperative computes immediately
+		- stream defers computation
+		- finally, they both require computation
+		- if it's a running, state machines might be more efficient.
+
+		TODO add touch support
 	-->
-	
+
 	Max Hold
 	<button onclick="start()">Start</button>
 	<button onclick="stop()">Stop</button>
@@ -41,10 +48,10 @@
 	<div id="reps" style="color: yellowgreen"></div>
 	<div id="durationLabel" style="color: greenyellow"></div>
 	<div id="elapsed"></div>
-	
+
 	<div id="statusLabel" style="color: yellow"></div>
 	<div id="remaining" style="color: red"></div>
-	
+
 
 	<script>
 		history = [
@@ -54,14 +61,13 @@
 		started = -1;
 		marker = -1;
 		currentReps = 0;
-		
+
 		events = [];
 		mode = 'hold';
 
 		statusLabel = document.getElementById('statusLabel');
 
 		initCanvas();
-		start();
 
 		function initCanvas() {
 			canvas = document.createElement('canvas');
@@ -72,24 +78,74 @@
 			ctx = canvas.getContext('2d');
 		}
 
-        const keydowns = {};
-        document.addEventListener('keydown', onkeydown);
-        document.addEventListener('keyup', onkeyup);
-        function onkeydown(e) {
-            if (keydowns[e.key]) return;
-            keydowns[e.key] = 1;
-            // emit event
-        }
 
-        function onkeyup(e) {
-            keydowns[e.key] = 0;
-            console.log('meh', e.key);
-            // emit event
-        }
-        
+		sessions = [];
+		try {
+			sessions = JSON.parse(localStorage.apnea_sessions);
+		}
+		catch (e) {
+
+		}
+
+
+
+		const keydowns = {};
+		document.addEventListener('keydown', onkeydown);
+		document.addEventListener('keyup', onkeyup);
+		function onkeydown(e) {
+			if (e.key !== ' ') return;
+			if (keydowns[e.key]) return;
+			console.log('on', e.key);
+			keydowns[e.key] = 1;
+			// emit event
+			events.push({
+				type: 'contraction_start',
+				time: Date.now()
+			});
+		}
+
+		function contraction_count() {
+			return events.filter(e => e.type === 'contraction_start').length;
+		}
+
+		function contraction_first() {
+			const first = events.find(e => e.type === 'contraction_start');
+			if (!first) return -1;
+			const lapse = first.time - started;
+			return lapse;
+		}
+
+		function contraction_avg_interval() {
+			// TODO
+		}
+
+		function contraction_avg_duration() {
+			// TODO
+		}
+
+		function onkeyup(e) {
+			if (e.key === 'Enter') {
+				if (started > 0)
+					stop();
+				else
+					start();
+				// start
+				// stop
+			}
+
+			if (e.key !== ' ') return;
+			keydowns[e.key] = 0;
+			console.log('off', e.key);
+			// emit event
+			events.push({
+				type: 'contraction_stop',
+				time: Date.now()
+			});
+		}
+
 
 		function start() {
-            // TODO add count down
+			// TODO add count down
 			started = Date.now();
 			ending = started;
 			events.push({
@@ -101,45 +157,65 @@
 		}
 
 		function stop() {
+			now = Date.now()
+			events.push({
+				type: 'end',
+				time: now
+			});
+
+			ok = confirm('Save?');
+			// TODO ask about session.
+
+			if (ok) {
+				sessions.push(events);
+				localStorage.apnea_sessions = JSON.stringify(sessions);
+			}
+
+			console.log('contraction_count', contraction_count());
+			console.log('first contraction', format(contraction_first()));
+			console.log('final', format(now - started));
+			
 			started = -1;
+			events = [];
 		}
 
 		function interval() {
 			const now = Date.now();
+			if (started < 0) return;
 
 			time = now - started
-            seconds = time / 1000 % 60;
-			
+			seconds = time / 1000 % 60;
+
 			// update canvas
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			ctx.beginPath();
 
-            // durationLabel.innerHTML = format(time)
-            label(format(time));
-			
+			// durationLabel.innerHTML = format(time)
+			label(format(time));
+
 			ctx.strokeStyle = '#222';
 			ring(350, 1);
 
-            ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
+			ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
 			ring(350, seconds / 60);
 		}
 
-        function label(text) {
-            // var text = ctx.measureText('foo'); // TextMetrics object
-            // text.width; // 16;
-            ctx.font = '120px monospace';
-            ctx.fillStyle = 'greenyellow'
-            ctx.fillText(text, 0, canvas.height / 2);
-        }
+		function label(text) {
+			// var text = ctx.measureText('foo'); // TextMetrics object
+			// text.width; // 16;
+			ctx.font = '120px monospace';
+			ctx.fillStyle = 'greenyellow'
+			ctx.fillText(text, 0, canvas.height / 2);
+		}
 
-        function ring(radius, t) {
-            ctx.lineWidth = 20;
+		function ring(radius, t) {
+			ctx.lineWidth = 20;
 			ARC_OFFSET = - Math.PI / 2;
 
-            ctx.beginPath();
+			ctx.beginPath();
 			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 * t + ARC_OFFSET, false);
 			ctx.stroke();
-        }
+		}
 
 		function format(lapse) {
 			const ms = '.' + (lapse % 1000 / 100 | 0);
