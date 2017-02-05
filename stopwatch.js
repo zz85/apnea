@@ -1,5 +1,12 @@
-history = [
-	{"time":1486052070298,"hold":45,"rest":15,"reptitions":10},
+// Sample format
+sessions = [
+	{
+		"time": 1486052070298,
+		"events": [],
+		"tags": [],
+		"notes": '', // description
+		// summary / duration / contractions
+	},
 ]
 
 started = -1;
@@ -14,6 +21,7 @@ statusLabel = document.getElementById('statusLabel');
 initCanvas();
 setInterval(interval, 15);
 
+document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });
 window.addEventListener('resize', resize);
 
 function resize() {
@@ -30,6 +38,8 @@ function initCanvas() {
 	canvas_container.appendChild(canvas);
 	canvas.width = 800;
 	canvas.height = 800;
+
+	resize();
 
 	ctx = canvas.getContext('2d');
 }
@@ -68,6 +78,15 @@ function contraction_first() {
 	return lapse;
 }
 
+function toggle() {
+	if (started > 0) {
+		stop();
+	}
+	else {
+		start();
+	}
+}
+
 function contraction_avg_interval() {
 	// TODO
 }
@@ -78,10 +97,7 @@ function contraction_avg_duration() {
 
 function onkeyup(e) {
 	if (e.key === 'Enter') {
-		if (started > 0)
-			stop();
-		else
-			start();
+		toggle();
 	}
 
 	if (e.key !== ' ') return;
@@ -103,7 +119,8 @@ function start() {
 		time: started
 	});
 
-	info.style.display = 'none';
+	instructions.style.display = 'none';
+	toggleButton.innerHTML = 'Stop';
 }
 
 function stop() {
@@ -113,25 +130,31 @@ function stop() {
 		time: now
 	});
 
-	stats = `Timing: ${format(now - started)}
-Contraction Count: ${contraction_count()}
-First Contration: ${format(contraction_first())}
+	stats = `Timing: ${format(now - started)}<br/>
+Contraction Count: ${contraction_count()}<br/>
+First Contration: ${format(contraction_first())}<br/>
 `
+
+	statsLabel.innerHTML = stats;
 
 	console.log(stats);
 
-	ok = confirm(`${stats}
-	Save?`);
-	// TODO ask about session.
-
-	if (ok) {
-		sessions.push(events);
-		localStorage.apnea_sessions = JSON.stringify(sessions);
-	}
-
 	started = -1;
+
+	// ok = confirm(`${stats}
+	// Save?`);
+	
+	// TODO ask about session.
+}
+
+function save() {
+	sessions.push(events);
+	localStorage.apnea_sessions = JSON.stringify(sessions);
+}
+
+function reset(ok) {
 	events = [];
-	info.style.display = 'flex';
+	toggleButton.innerHTML = 'Start';
 }
 
 function interval() {
@@ -153,29 +176,23 @@ function interval() {
 
 	if (started < 0) return;
 
-	ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
+	ctx.strokeStyle = 'yellow'; // '#ddd'; // red
 	ring(radius, seconds / 60);
 
-	// durationLabel.innerHTML = format(time)
 	label(format(time));
 
-
 	ctx.font = '12px monospace'
-	contract = events.filter(e => e.type === 'contraction_start').map(e => format(e.time - started)).join('\n');
-	ctx.fillText(contract, canvas.width / 2, canvas.height * 2 / 3);
 }
 
 function timeline() {
-
 	ctx.save();
-	ctx.translate(100, 200);
+	ctx.translate(50, 50);
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = '#fff';
 
 	const MINS = 60;
 	const SECS_10 = 10;
 	const PPS = 3.2; // Pixel per second
-
 
 	// ctx.lineCap = "round"; // butt round square
 	for (let x = 0; x <= 5; x++) {
@@ -248,20 +265,25 @@ function timeline() {
 function label(text) {
 	// var text = ctx.measureText('foo'); // TextMetrics object
 	// text.width; // 16;
-	ctx.font = '20vmin monospace'; // 120px
-	ctx.fillStyle = 'greenyellow';
-	ctx.textAlign = 'center';
-	ctx.textBaseline = 'middle'; // "top" || "hanging" || "middle" || "alphabetic" || "ideographic" || "bottom";
-	ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+	// ctx.font = '20vmin monospace'; // 120px
+	// ctx.fillStyle = 'greenyellow';
+	// ctx.textAlign = 'center';
+	// ctx.textBaseline = 'middle'; // "top" || "hanging" || "middle" || "alphabetic" || "ideographic" || "bottom";
+	// ctx.fillText(text, canvas.width / 2, canvas.height / 2);
+
+	durationLabel.innerHTML = text;
 }
 
 function ring(radius, t) {
+	ctx.save();
+	ctx.lineCap = 'round';
 	ctx.lineWidth = radius / 20;
 	ARC_OFFSET = - Math.PI / 2;
 
 	ctx.beginPath();
 	ctx.arc(canvas.width / 2, canvas.height / 2, radius, ARC_OFFSET, Math.PI * 2 * t + ARC_OFFSET, false);
 	ctx.stroke();
+	ctx.restore();
 }
 
 function format(lapse) {

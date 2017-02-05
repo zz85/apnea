@@ -1,12 +1,25 @@
-<html>
-<body>
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>Max Breath hold Stopwatch</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	</head>
+	<body>
 	<style>
+
+	html {
+		height: 100%;
+	}
+
 	body {
+		margin: 0;
+		height: 100%;
 		font-family: monospace;
 		font-size: 24px;
 		background: #333;
 		color: #eee;
-		overflow: auto;
+		overflow: hidden;
 	}
 
 	div {
@@ -17,12 +30,34 @@
 		/*5.9vw;*/
 	}
 
+	button {
+		font-size: 8vmin;
+		margin: 0.5em;
+		padding: 0.1em 0.4em;
+		background: #333;
+		color: #eee;
+
+	}
+
 	#canvas_container {
 		display: flex;
 		align-content: center;
 		justify-content: center;
 		align-items: center;
+		height: 100vh;
+	}
+
+	.overlay {
+		position: absolute;
+		z-index: 20;
+		width: 100%;
 		height: 100%;
+	}
+
+	#durationLabel {
+		font-size: 20vmin;
+		font-family: monospace;
+		color: greenyellow;
 	}
 	</style>
 
@@ -49,18 +84,23 @@
 
 	<!--<button onclick="start()">Start</button>
 	<button onclick="stop()">Stop</button>-->
-	<div style="z-index: 20; position: absolute; width: 100%; height: 100%;">
-		<div id="canvas_container"></div>
+
+	<div class="overlay">
+		<div id="info" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column;">
+
+			<div id="instructions">
+				<div id="reps" style="color: yellowgreen; font-size: 2em">Stopwatch</div>
+				<div id="statusLabel" style="color: yellow">Hit Enter to Start / Stop</div>
+				<div id="remaining" style="color: red">Tap Space for Contractions</div>
+			</div>
+			<div id="statsLabel"></div>
+			<div id="durationLabel" style="color: greenyellow"></div>
+
+			<button id="toggleButton" onclick="toggle()">Start</button>
+		</div>
 	</div>
 
-	<div id="info" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column;">
-		<div id="reps" style="color: yellowgreen; font-size: 2em">Max Hold</div>
-		<div id="statusLabel" style="color: yellow">Hit Enter to Start / Stop</div>
-		<div id="remaining" style="color: red">Tap Space for Contractions</div>
-	</div>
-
-	</div>
-
+	<div id="canvas_container"></div>
 	<script src="stopwatch.js"></script>
 </body>
 </html>
