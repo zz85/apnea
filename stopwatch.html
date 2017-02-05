@@ -113,7 +113,6 @@
 		function onkeydown(e) {
 			if (e.key !== ' ') return;
 			if (keydowns[e.key]) return;
-			console.log('on', e.key);
 			keydowns[e.key] = 1;
 			// emit event
 			events.push({
@@ -151,7 +150,6 @@
 
 			if (e.key !== ' ') return;
 			keydowns[e.key] = 0;
-			console.log('off', e.key);
 			// emit event
 			events.push({
 				type: 'contraction_stop',
@@ -178,8 +176,15 @@
 				type: 'end',
 				time: now
 			});
+			
+			stats = `Contraction Count: ${contraction_count()}
+First Contration: ${format(contraction_first())}
+Timing: ${format(now - started)}`
 
-			ok = confirm('Save?');
+			console.log(stats);
+
+			ok = confirm(`${stats}
+			Save?`);
 			// TODO ask about session.
 
 			if (ok) {
@@ -187,10 +192,6 @@
 				localStorage.apnea_sessions = JSON.stringify(sessions);
 			}
 
-			console.log('contraction_count', contraction_count());
-			console.log('first contraction', format(contraction_first()));
-			console.log('final', format(now - started));
-			
 			started = -1;
 			events = [];
 			info.style.display = 'flex';
