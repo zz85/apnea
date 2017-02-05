@@ -34,36 +34,7 @@
 		- Vibrations
 	-->
 	
-	Hold Duration:
-	<select id="static">
-		<option value="5">0:05</option>
-		<option value="30">0:30</option>
-		<option value="45" selected>0:45</option>
-		<option value="60">1:00</option>
-	<select>
-
-	Rest Duration: 
-	<select id="recovery">
-		<option value="15">0:15</option>
-		<option value="30">0:30</option>
-		<option value="45">0:45</option>
-		<option value="60">1:00</option>
-	</select>
-
-	Repetitions:
-	<select id="reptitions">
-		<option value="1">1</option>
-		<option value="2">2</option>
-		<option value="3">3</option>
-		<option value="4">4</option>
-		<option value="5">5</option>
-		<option value="6">6</option>
-		<option value="7">7</option>
-		<option value="8">8</option>
-		<option value="9">9</option>
-		<option value="10">10</option>
-	</select>
-
+	Max Hold
 	<button onclick="start()">Start</button>
 	<button onclick="stop()">Stop</button>
 
@@ -86,8 +57,6 @@
 		
 		events = [];
 		mode = 'hold';
-		// breath / relax / rest
-		// hold / static 
 
 		statusLabel = document.getElementById('statusLabel');
 
@@ -103,9 +72,24 @@
 			ctx = canvas.getContext('2d');
 		}
 
+        const keydowns = {};
+        document.addEventListener('keydown', onkeydown);
+        document.addEventListener('keyup', onkeyup);
+        function onkeydown(e) {
+            if (keydowns[e.key]) return;
+            keydowns[e.key] = 1;
+            // emit event
+        }
+
+        function onkeyup(e) {
+            keydowns[e.key] = 0;
+            console.log('meh', e.key);
+            // emit event
+        }
+        
+
 		function start() {
-			static_ms = static.value * 1000;
-			recovery_ms = recovery.value * 1000;
+            // TODO add count down
 			started = Date.now();
 			ending = started;
 			events.push({
@@ -113,58 +97,49 @@
 				time: started
 			});
 
-			// marker = started;
-			// ending = started + static_ms;
-
 			setInterval(interval, 15);
 		}
 
 		function stop() {
-			// TODO
+			started = -1;
 		}
 
 		function interval() {
 			const now = Date.now();
 
-			if (now >= ending) {
-				marker = ending;
-				if (mode !== 'hold') {
-					currentDuration = static_ms;
-					mode = 'hold';
-					currentReps++;
-				}
-				else {
-					currentDuration = recovery_ms;
-					mode = 'rest';
-				}
-				
-				ending = marker + currentDuration;
-			}
-
-			lapse = now - marker;
-			left = ending - now;
+			time = now - started
+            seconds = time / 1000 % 60;
 			
-			durationLabel.innerHTML = format(currentDuration)
-			elapsed.innerHTML = format(lapse);
-			remaining.innerHTML = format(left);
-			statusLabel.innerHTML = mode;
-			reps.innerHTML = 'Round ' + currentReps;
-
 			// update canvas
 			ctx.clearRect(0, 0, canvas.width, canvas.height);
 			ctx.beginPath();
-			ctx.lineWidth = 20;
+
+            // durationLabel.innerHTML = format(time)
+            label(format(time));
+			
+			ctx.strokeStyle = '#222';
+			ring(350, 1);
+
+            ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
+			ring(350, seconds / 60);
+		}
+
+        function label(text) {
+            // var text = ctx.measureText('foo'); // TextMetrics object
+            // text.width; // 16;
+            ctx.font = '120px monospace';
+            ctx.fillStyle = 'greenyellow'
+            ctx.fillText(text, 0, canvas.height / 2);
+        }
+
+        function ring(radius, t) {
+            ctx.lineWidth = 20;
 			ARC_OFFSET = - Math.PI / 2;
 
-			ctx.strokeStyle = '#222';
-			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 + ARC_OFFSET, false);
+            ctx.beginPath();
+			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 * t + ARC_OFFSET, false);
 			ctx.stroke();
-
-			ctx.beginPath();
-			ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
-			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 * lapse / currentDuration + ARC_OFFSET, false);
-			ctx.stroke();
-		}
+        }
 
 		function format(lapse) {
 			const ms = '.' + (lapse % 1000 / 100 | 0);
