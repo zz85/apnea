@@ -6,18 +6,23 @@
 		font-size: 24px;
 		background: #333;
 		color: #eee;
+		overflow: auto;
 	}
 
 	div {
-		font-size: 40px;
+		/*font-size: 40px;*/
 		text-align: center;
+		font-size: 5vmin;
+		/*3.0vh;*/
+		/*5.9vw;*/
 	}
 
-	canvas {
-		position: absolute;
-		z-index: 2;
-		top: 0;
-		left: 0;
+	#canvas_container {
+		display: flex;
+		align-content: center;
+		justify-content: center;
+		align-items: center;
+		height: 100%;
 	}
 	</style>
 
@@ -44,11 +49,16 @@
 	
 	<!--<button onclick="start()">Start</button>
 	<button onclick="stop()">Stop</button>-->
+	<div style="z-index: 20; position: absolute; width: 100%; height: 100%;">
+		<div id="canvas_container"></div>
+	</div>
 
 	<div id="info" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column;">
-		<div id="reps" style="color: yellowgreen">Max Hold</div>
+		<div id="reps" style="color: yellowgreen; font-size: 2em">Max Hold</div>
 		<div id="statusLabel" style="color: yellow">Hit Enter to Start / Stop</div>
 		<div id="remaining" style="color: red">Tap Space for Contractions</div>
+	</div>
+
 	</div>
 
 	<script>
@@ -68,9 +78,20 @@
 		initCanvas();
 		setInterval(interval, 15);
 
+		window.addEventListener('resize', resize);
+
+		function resize() {
+			const smaller = Math.min(window.innerWidth, window.innerHeight);
+			canvas.width = smaller;
+			canvas.height = smaller;
+
+			canvas.style.width = smaller;
+			canvas.style.height = smaller;
+		}
+
 		function initCanvas() {
 			canvas = document.createElement('canvas');
-			document.body.appendChild(canvas);
+			canvas_container.appendChild(canvas);
 			canvas.width = 800;
 			canvas.height = 800;
 
@@ -85,8 +106,6 @@
 		catch (e) {
 
 		}
-
-
 
 		const keydowns = {};
 		document.addEventListener('keydown', onkeydown);
@@ -128,8 +147,6 @@
 					stop();
 				else
 					start();
-				// start
-				// stop
 			}
 
 			if (e.key !== ' ') return;
@@ -176,6 +193,7 @@
 			
 			started = -1;
 			events = [];
+			info.style.display = 'flex';
 		}
 
 		function interval() {
@@ -189,23 +207,29 @@
 			ctx.beginPath();
 
 			ctx.strokeStyle = '#222';
-			ring(350, 1);
+			radius = canvas.width * 0.45;
+			// console.log(radius);
+			ring(radius, 1);
 
 			if (started < 0) return;
 
 			ctx.strokeStyle = mode === 'rest' ? 'yellow': '#ddd'; // red
-			ring(350, seconds / 60);
+			ring(radius, seconds / 60);
 
 			// durationLabel.innerHTML = format(time)
 			label(format(time));
 
+
+			ctx.font = '12px monospace'
+			contract = events.filter(e => e.type === 'contraction_start').map(e => format(e.time - started)).join('\n');
+			ctx.fillText(contract, canvas.width / 2, canvas.height * 2 / 3);
 
 		}
 
 		function label(text) {
 			// var text = ctx.measureText('foo'); // TextMetrics object
 			// text.width; // 16;
-			ctx.font = '120px monospace';
+			ctx.font = '20vmin monospace'; // 120px
 			ctx.fillStyle = 'greenyellow';
 			ctx.textAlign = 'center';
 			ctx.textBaseline = 'middle'; // "top" || "hanging" || "middle" || "alphabetic" || "ideographic" || "bottom";
@@ -213,11 +237,11 @@
 		}
 
 		function ring(radius, t) {
-			ctx.lineWidth = 20;
+			ctx.lineWidth = radius / 20;
 			ARC_OFFSET = - Math.PI / 2;
 
 			ctx.beginPath();
-			ctx.arc(canvas.width / 2, canvas.height / 2, 350, ARC_OFFSET, Math.PI * 2 * t + ARC_OFFSET, false);
+			ctx.arc(canvas.width / 2, canvas.height / 2, radius, ARC_OFFSET, Math.PI * 2 * t + ARC_OFFSET, false);
 			ctx.stroke();
 		}
 
