@@ -235,7 +235,8 @@ function timeline() {
 
 	const MINS = 60;
 	const SECS_10 = 10;
-	const PPS = 3.2; // Pixel per second
+	const PPS = 2; // unit pixel per second
+	// 3.2
 
 	// ctx.lineCap = "round"; // butt round square
 	for (let x = 0; x <= 5; x++) {
