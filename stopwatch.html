@@ -25,7 +25,7 @@
 	div {
 		/*font-size: 40px;*/
 		text-align: center;
-		font-size: 5vmin;
+		font-size: 3vmin;
 		/*3.0vh;*/
 		/*5.9vw;*/
 	}
@@ -66,41 +66,47 @@
 	</style>
 
 	<!--
-		TODOs
-
+		DONE
 		centeralign timing.
 		count contractions.
 		visualize contractions.
+		mobile touch support
 
-		put all events into a stream,
-		reduce that.
-		if needed, optimize.
+		TODOs
+		splitting (dom style updates / events)
 
-		stream vs imperative
-		- imperative computes immediately
-		- stream defers computation
-		- finally, they both require computation
-		- if it's a running, state machines might be more efficient.
+		Subdivide static stages
+		- pre contractions
+		- big contractions
+		- Brain drain
+		- fast contractions
 
-		TODO add touch support
+		add tagging and notes
 
-		splitting (dom style updates / events) 
+		clock face
+
+		refactor
+		clean format and event types
+
+		history viewer
+
+		server side.
+
+		expand timeline?
+
+		Heart Rates.
+
+		layered rings.
 	-->
-
-
-	<!--<button onclick="start()">Start</button>
-	<button onclick="stop()">Stop</button>-->
 
 	<div class="overlay">
 		<div id="info" style="display: flex; align-items: center; justify-content: center; height: 100%; flex-direction: column;">
 
 			<div id="instructions">
-				<div id="reps" style="color: yellowgreen; font-size: 2em">Stopwatch</div>
-				<div id="statusLabel" style="color: yellow">Hit Enter to Start / Stop</div>
-				<div id="remaining" style="color: red">Tap Space for Contractions</div>
+				<div id="reps" style="color: yellowgreen; font-size: 2em">Apnea Stopwatch</div>
+				<div id="statusLabel" style="color: yellow">Tap button to Start / Stop.<br/>Tap elsewhere for Contractions</div>
+				<!--<div id="remaining" style="color: red">Hit Enter to Start / Stop. Tap Space for Contractions</div>-->
 			</div>
-
-
 			
 			<div id="resultsCard">
 				<div id="statsLabel"></div>

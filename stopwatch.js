@@ -21,28 +21,22 @@ statusLabel = document.getElementById('statusLabel');
 initCanvas();
 setInterval(interval, 15);
 
-
-// document.addEventListener('mousedown', (e) => {
-// 	console.log('mousedown', e);
-// 	contraction_down();
-// });
-// document.addEventListener('mouseup', (e) => {
-// 	console.log('mouseup', e);
-// 	contraction_up();
-// });
-
-document.addEventListener('touchstart', (e) => {
-	if (e.target instanceof HTMLButtonElement) return;
-	// TODO check target is not button.
-	contraction_down();
-})
-
-document.addEventListener('touchend', (e) => {
-	if (e.target instanceof HTMLButtonElement) return;
-	contraction_up();
-})
+document.addEventListener('mousedown', down);
+document.addEventListener('mouseup', up);
+document.addEventListener('touchstart', down);
+document.addEventListener('touchend', up)
 document.body.addEventListener('touchmove', function(e) { e.preventDefault(); });
 window.addEventListener('resize', resize);
+
+function down(e) {
+	if (e.target instanceof HTMLButtonElement) return;
+	contraction_down();
+}
+
+function up(e) {
+	if (e.target instanceof HTMLButtonElement) return;
+	contraction_up();
+}
 
 function resize() {
 	const smaller = Math.min(window.innerWidth, window.innerHeight);
@@ -65,7 +59,6 @@ function initCanvas() {
 
 	ctx = canvas.getContext('2d');
 }
-
 
 sessions = [];
 try {
@@ -164,7 +157,7 @@ function stop() {
 
 	stats = `<div class="duration">${format(now - started)}</div>
 Contraction Count: ${contraction_count()}<br/>
-First Contration: ${format(contraction_first())}<br/>
+First Contraction: ${format(contraction_first())}<br/>
 `
 
 	statsLabel.innerHTML = stats;
@@ -175,15 +168,21 @@ First Contration: ${format(contraction_first())}<br/>
 
 	resultsCard.style.display = 'block';
 	runningCard.style.display = 'none';
-
-	// ok = confirm(`${stats}
-	// Save?`);
 	
 	// TODO ask about session.
 }
 
 function save() {
-	sessions.push(events);
+	notes = prompt('Notes?');
+	if (notes === null) return;
+	session = {
+		notes,
+		events,
+		time: Date.now(),
+		type: 'hold'
+	}
+
+	sessions.push(session);
 	localStorage.apnea_sessions = JSON.stringify(sessions);
 
 	reset();
