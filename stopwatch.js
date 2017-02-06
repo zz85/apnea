@@ -45,11 +45,13 @@ window.addEventListener('resize', resize);
 
 function resize() {
 	const smaller = Math.min(window.innerWidth, window.innerHeight);
-	canvas.width = smaller;
-	canvas.height = smaller;
 
-	canvas.style.width = smaller;
-	canvas.style.height = smaller;
+	dpr = window.devicePixelRatio;
+	canvas.width = smaller * dpr;
+	canvas.height = smaller * dpr;
+
+	canvas.style.width = smaller + 'px';
+	canvas.style.height = smaller + 'px';
 }
 
 function initCanvas() {
@@ -187,6 +189,7 @@ function reset(ok) {
 }
 
 function interval() {
+	ctx.save();
 	const now = Date.now();
 
 	time = now - started
@@ -203,7 +206,7 @@ function interval() {
 
 	timeline();
 
-	if (started < 0) return;
+	if (started < 0) return ctx.restore();
 
 	ctx.strokeStyle = 'yellow'; // '#ddd'; // red
 	ring(radius, seconds / 60);
@@ -211,10 +214,12 @@ function interval() {
 	label(format(time));
 
 	ctx.font = '12px monospace'
+	return ctx.restore();
 }
 
 function timeline() {
 	ctx.save();
+	ctx.scale(dpr, dpr);
 	ctx.translate(50, 50);
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = '#fff';
