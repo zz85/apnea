@@ -54,10 +54,14 @@
 		height: 100%;
 	}
 
-	#durationLabel {
+	.duration {
 		font-size: 20vmin;
 		font-family: monospace;
 		color: greenyellow;
+	}
+
+	#resultsCard {
+		display: none;
 	}
 	</style>
 
@@ -79,6 +83,8 @@
 		- if it's a running, state machines might be more efficient.
 
 		TODO add touch support
+
+		splitting (dom style updates / events) 
 	-->
 
 
@@ -93,10 +99,19 @@
 				<div id="statusLabel" style="color: yellow">Hit Enter to Start / Stop</div>
 				<div id="remaining" style="color: red">Tap Space for Contractions</div>
 			</div>
-			<div id="statsLabel"></div>
-			<div id="durationLabel" style="color: greenyellow"></div>
 
-			<button id="toggleButton" onclick="toggle()">Start</button>
+
+			
+			<div id="resultsCard">
+				<div id="statsLabel"></div>
+				<button onclick="save()">Save</button>
+				<button onclick="reset()">Reset</button>
+			</div>
+
+			<div id="runningCard">
+				<div id="durationLabel" class="duration">0:00.0</div>
+				<button id="toggleButton" onclick="toggle()">Start</button>
+			</div>
 		</div>
 	</div>
 

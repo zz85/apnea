@@ -161,7 +161,7 @@ function stop() {
 		time: now
 	});
 
-	stats = `Timing: ${format(now - started)}<br/>
+	stats = `<div class="duration">${format(now - started)}</div>
 Contraction Count: ${contraction_count()}<br/>
 First Contration: ${format(contraction_first())}<br/>
 `
@@ -172,6 +172,9 @@ First Contration: ${format(contraction_first())}<br/>
 
 	started = -1;
 
+	resultsCard.style.display = 'block';
+	runningCard.style.display = 'none';
+
 	// ok = confirm(`${stats}
 	// Save?`);
 	
@@ -181,11 +184,17 @@ First Contration: ${format(contraction_first())}<br/>
 function save() {
 	sessions.push(events);
 	localStorage.apnea_sessions = JSON.stringify(sessions);
+
+	reset();
 }
 
-function reset(ok) {
+function reset() {
 	events = [];
+
+	durationLabel.innerHTML = '0:00.0';
 	toggleButton.innerHTML = 'Start';
+	resultsCard.style.display = 'none';
+	runningCard.style.display = 'block';
 }
 
 function interval() {
@@ -213,7 +222,6 @@ function interval() {
 
 	label(format(time));
 
-	ctx.font = '12px monospace'
 	return ctx.restore();
 }
 
@@ -221,6 +229,7 @@ function timeline() {
 	ctx.save();
 	ctx.scale(dpr, dpr);
 	ctx.translate(50, 50);
+	ctx.font = '10px monospace';
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = '#fff';
 
