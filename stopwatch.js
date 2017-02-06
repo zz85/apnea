@@ -32,12 +32,13 @@ setInterval(interval, 15);
 // });
 
 document.addEventListener('touchstart', (e) => {
-	// console.log(e);
+	if (e.target instanceof HTMLButtonElement) return;
 	// TODO check target is not button.
 	contraction_down();
 })
 
 document.addEventListener('touchend', (e) => {
+	if (e.target instanceof HTMLButtonElement) return;
 	contraction_up();
 })
 document.body.addEventListener('touchmove', function(e) { e.preventDefault(); });
