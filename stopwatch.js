@@ -22,9 +22,18 @@ initCanvas();
 setInterval(interval, 15);
 
 
+// document.addEventListener('mousedown', (e) => {
+// 	console.log('mousedown', e);
+// 	contraction_down();
+// });
+// document.addEventListener('mouseup', (e) => {
+// 	console.log('mouseup', e);
+// 	contraction_up();
+// });
 
 document.addEventListener('touchstart', (e) => {
-	console.log(e);
+	// console.log(e);
+	// TODO check target is not button.
 	contraction_down();
 })
 
@@ -232,7 +241,7 @@ function timeline() {
 		ctx.lineTo(cx, 5);
 		ctx.stroke();
 
-		if (x % 3 === 0) ctx.strokeText(format(x * SECS_10 * 1000), cx, -20);
+		if (x % 3 === 0) ctx.strokeText(format(x * SECS_10 * 1000, 0), cx, -20);
 	}
 
 	for (let x = 0; x <= 5 * 60; x++) {
@@ -306,8 +315,8 @@ function ring(radius, t) {
 	ctx.restore();
 }
 
-function format(lapse) {
-	const ms = '.' + (lapse % 1000 / 100 | 0);
+function format(lapse, dec = 1) {
+	const ms = dec ? '.' + (lapse % 1000 / 100 | 0) : '';
 	const total_s = lapse / 1000 | 0;
 	const s = total_s % 60;
 	const min = total_s / 60 | 0;
