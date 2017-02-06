@@ -21,7 +21,17 @@ statusLabel = document.getElementById('statusLabel');
 initCanvas();
 setInterval(interval, 15);
 
-document.body.addEventListener('touchmove', function(e){ e.preventDefault(); });
+
+
+document.addEventListener('touchstart', (e) => {
+	console.log(e);
+	contraction_down();
+})
+
+document.addEventListener('touchend', (e) => {
+	contraction_up();
+})
+document.body.addEventListener('touchmove', function(e) { e.preventDefault(); });
 window.addEventListener('resize', resize);
 
 function resize() {
@@ -61,8 +71,21 @@ function onkeydown(e) {
 	if (keydowns[e.key]) return;
 	keydowns[e.key] = 1;
 	// emit event
+	contraction_down();
+}
+
+function contraction_down() {
+	if (started < 0) return;
 	events.push({
 		type: 'contraction_start',
+		time: Date.now()
+	});
+}
+
+function contraction_up() {
+	if (started < 0) return;
+	events.push({
+		type: 'contraction_stop',
 		time: Date.now()
 	});
 }
@@ -103,10 +126,7 @@ function onkeyup(e) {
 	if (e.key !== ' ') return;
 	keydowns[e.key] = 0;
 	// emit event
-	events.push({
-		type: 'contraction_stop',
-		time: Date.now()
-	});
+	contraction_up();
 }
 
 
