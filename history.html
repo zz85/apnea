@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>History Viewer</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+	</head>
+	<body>
+	<style>
+
+	html {
+		height: 100%;
+	}
+
+	body {
+		font-family: monospace;
+		font-size: 12px;
+		background: #333;
+		color: #eee;
+	}
+
+
+	/*#canvas_container {
+		display: flex;
+		align-content: center;
+		justify-content: center;
+		align-items: center;
+		height: 100vh;
+	}*/
+
+
+	</style>
+
+	<div id="canvas_container"></div>
+	<script src="format.js"></script>
+	<script src="metrics.js"></script>
+
+    <div id="logs">
+    </div>
+	<script>
+    sessions = sessions.map(convert).filter(s => s.time)
+    // console.log('sessions', sessions);
+    // saveToStorage(sessions);
+
+    sessions.forEach(processSession)
+
+    function convert(session) {
+        if (session instanceof Array) {
+            session = {
+                events: session
+            }
+        }
+
+		const type_migration = {
+			'started': 'start',
+			'end': 'stop',
+			'contraction_start': 'contraction_on',
+			'contraction_stop': 'contraction_off'
+		};
+
+		session.events = session.events.map(e => {
+			if (e.type in type_migration) {
+				e.type = type_migration[e.type];
+			}
+
+			return e;
+		});
+
+		if (!session.time) session.time = time_start(session.events);
+
+        return session;
+    }
+
+    function processSession(session, i) {
+        time = formatTime(new Date(session.time));
+
+		events = session.events;
+		start = new Date(time_start(events))
+		stop = new Date(time_stop(events))
+
+		ccount = contraction_count(events);
+		cfirst = contraction_first(events);
+		clast = contraction_last(events);
+		period = contraction_period(events);
+		avg = contraction_avg_interval(events);
+
+        console.log(time, start, session);
+
+		div = document.createElement('div');
+		div.innerHTML = `
+			<div>
+				${pad(i + 1)}. ${time} | ${format(stop - start)} | Contractions: ${pad(ccount)}
+				| First: ${format(cfirst)} | Last: ${format(clast)} Period: ${format(period)} Interval: ${format(avg)}
+			</div>
+		`;
+		logs.appendChild(div);
+    }
+    </script>
+</body>
+</html>

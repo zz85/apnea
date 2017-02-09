@@ -65,7 +65,7 @@ function onkeydown(e) {
 function contraction_down() {
 	if (started < 0) return;
 	events.push({
-		type: 'contraction_start',
+		type: 'contraction_on',
 		time: Date.now()
 	});
 }
@@ -73,7 +73,7 @@ function contraction_down() {
 function contraction_up() {
 	if (started < 0) return;
 	events.push({
-		type: 'contraction_stop',
+		type: 'contraction_off',
 		time: Date.now()
 	});
 }
@@ -106,7 +106,7 @@ function start() {
 	started = Date.now();
 	ending = started;
 	events.push({
-		type: 'started',
+		type: 'start',
 		time: started
 	});
 
@@ -117,13 +117,13 @@ function start() {
 function stop() {
 	now = Date.now()
 	events.push({
-		type: 'end',
+		type: 'stop',
 		time: now
 	});
 
 	stats = `<div class="duration">${format(now - started)}</div>
-Contraction Count: ${contraction_count()}<br/>
-First Contraction: ${format(contraction_first())}<br/>
+Contraction Count: ${contraction_count(events)}<br/>
+First Contraction: ${format(contraction_first(events))}<br/>
 `
 
 	statsLabel.innerHTML = stats;
@@ -234,7 +234,7 @@ function timeline() {
 
 	let te = events;
 	// te = sessions[sessions.length - 1];
-	s = te.find(e => e.type === 'started')
+	s = te.find(e => e.type === 'start')
 	if (!s) return ctx.restore();
 	s = s.time;
 
@@ -244,7 +244,7 @@ function timeline() {
 	te.forEach(e => {
 		t = (e.time - s) / 1000 * PPS
 		switch (e.type) {
-			case 'contraction_start':
+			case 'contraction_on':
 			ctx.beginPath();
 				// ctx.arc(t, 18, 3, 0, 7)
 				// ctx.fill();
@@ -252,14 +252,14 @@ function timeline() {
 				ctx.beginPath();
 				ctx.moveTo(t, 18);
 				break;
-			case 'contraction_stop':
+			case 'contraction_off':
 				ctx.lineTo(t, 18);
 				ctx.strokeStyle = 'red';
 				ctx.stroke();
 
 
 				break;
-			case 'end':
+			case 'stop':
 				ctx.strokeStyle = 'yellow';
 				ctx.lineWidth = 2;
 				ctx.beginPath();
@@ -294,18 +294,4 @@ function ring(radius, t) {
 	ctx.arc(canvas.width / 2, canvas.height / 2, radius, ARC_OFFSET, Math.PI * 2 * t + ARC_OFFSET, false);
 	ctx.stroke();
 	ctx.restore();
-}
-
-function format(lapse, dec = 1) {
-	const ms = dec ? '.' + (lapse % 1000 / 100 | 0) : '';
-	const total_s = lapse / 1000 | 0;
-	const s = total_s % 60;
-	const min = total_s / 60 | 0;
-
-	return `${pad(min, 1)}:${pad(s)}${ms}`;
-}
-
-function pad(value, digits=2) {
-	const string = value + '';
-	return Array(Math.max(digits - string.length,0)).fill('0').join('') + string;
 }
