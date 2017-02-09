@@ -48,5 +48,7 @@ function loadFromStorage() {
 
 // Save
 function saveToStorage(sessions) {
+    if (!sessions) return;
+    localStorage.apnea_sessions_bak = localStorage.apnea_sessions;
     localStorage.apnea_sessions = JSON.stringify(sessions);
 }

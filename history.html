@@ -19,6 +19,10 @@
 		color: #eee;
 	}
 
+	a {
+		color: #ccc;
+	}
+
 
 	/*#canvas_container {
 		display: flex;
@@ -42,7 +46,12 @@
     // console.log('sessions', sessions);
     // saveToStorage(sessions);
 
-    sessions.forEach(processSession)
+	refresh();
+	function refresh() {
+		logs.innerHTML = '';
+		sessions.forEach(processSession)
+	}
+
 
     function convert(session) {
         if (session instanceof Array) {
@@ -71,6 +80,18 @@
         return session;
     }
 
+	function del(ts) {
+		sessions = loadFromStorage();
+		item = sessions.find(s => s.time === ts);
+		index = sessions.indexOf(item);
+		really = confirm('Delete?' + index)
+		if (really && index) {
+			sessions.splice(index, 1);
+		}
+		saveToStorage(sessions);
+		refresh();
+	}
+
     function processSession(session, i) {
         time = formatTime(new Date(session.time));
 
@@ -80,7 +101,7 @@
 
 		ccount = contraction_count(events);
 		cfirst = contraction_first(events);
-		clast = contraction_last(events);
+		// clast = contraction_last(events);
 		period = contraction_period(events);
 		avg = contraction_avg_interval(events);
 
@@ -89,8 +110,11 @@
 		div = document.createElement('div');
 		div.innerHTML = `
 			<div>
-				${pad(i + 1)}. ${time} | ${format(stop - start)} | Contractions: ${pad(ccount)}
-				| First: ${format(cfirst)} | Last: ${format(clast)} Period: ${format(period)} Interval: ${format(avg)}
+				${pad(i + 1)}. ${time} | ${format(stop - start)} | Contractions Count: ${pad(ccount)}
+				First: ${format(cfirst)} Interval: ${format(avg)}
+				|
+				<a href="#" onclick="del(${session.time}); return false;">(delete)</a>
+				 | ${session.notes || ''}
 			</div>
 		`;
 		logs.appendChild(div);
