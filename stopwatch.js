@@ -1,13 +1,3 @@
-// Sample format
-sessions = [
-	{
-		"time": 1486052070298,
-		"events": [],
-		"tags": [],
-		"notes": '', // description
-		// summary / duration / contractions
-	},
-]
 
 started = -1;
 marker = -1;
@@ -60,13 +50,6 @@ function initCanvas() {
 	ctx = canvas.getContext('2d');
 }
 
-sessions = [];
-try {
-	sessions = JSON.parse(localStorage.apnea_sessions);
-}
-catch (e) {
-
-}
 
 const keydowns = {};
 document.addEventListener('keydown', onkeydown);
@@ -95,17 +78,6 @@ function contraction_up() {
 	});
 }
 
-function contraction_count() {
-	return events.filter(e => e.type === 'contraction_start').length;
-}
-
-function contraction_first() {
-	const first = events.find(e => e.type === 'contraction_start');
-	if (!first) return -1;
-	const lapse = first.time - started;
-	return lapse;
-}
-
 function toggle() {
 	if (started > 0) {
 		stop();
@@ -113,14 +85,8 @@ function toggle() {
 	else {
 		start();
 	}
-}
 
-function contraction_avg_interval() {
-	// TODO
-}
-
-function contraction_avg_duration() {
-	// TODO
+	toggleButton.blur();
 }
 
 function onkeyup(e) {
@@ -183,7 +149,7 @@ function save() {
 	}
 
 	sessions.push(session);
-	localStorage.apnea_sessions = JSON.stringify(sessions);
+	saveToStorage(sessions)
 
 	reset();
 }
