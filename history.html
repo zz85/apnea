@@ -38,6 +38,7 @@
 	<div id="canvas_container"></div>
 	<script src="format.js"></script>
 	<script src="metrics.js"></script>
+	<script src="graph.js"></script>
 
     <div id="logs">
     </div>
@@ -49,6 +50,7 @@
 	refresh();
 	function refresh() {
 		logs.innerHTML = '';
+		sessions = loadFromStorage();
 		sessions.forEach(processSession)
 	}
 
@@ -84,8 +86,9 @@
 		sessions = loadFromStorage();
 		item = sessions.find(s => s.time === ts);
 		index = sessions.indexOf(item);
-		really = confirm('Delete?' + index)
-		if (really && index) {
+		really = confirm('Delete?')
+		if (really && index > -1) {
+			console.log('deleting')
 			sessions.splice(index, 1);
 		}
 		saveToStorage(sessions);
@@ -98,6 +101,7 @@
 		events = session.events;
 		start = new Date(time_start(events))
 		stop = new Date(time_stop(events))
+		dur = stop - start;
 
 		ccount = contraction_count(events);
 		cfirst = contraction_first(events);
@@ -110,13 +114,27 @@
 		div = document.createElement('div');
 		div.innerHTML = `
 			<div>
-				${pad(i + 1)}. ${time} | ${format(stop - start)} | Contractions Count: ${pad(ccount)}
+				${pad(i + 1)}.<br/.
+				${session.notes || ''}<br/>
+				${time} | ${format(dur)} | Contractions Count: ${pad(ccount)}
 				First: ${format(cfirst)} Interval: ${format(avg)}
 				|
 				<a href="#" onclick="del(${session.time}); return false;">(delete)</a>
-				 | ${session.notes || ''}
+
 			</div>
 		`;
+
+		canvas = document.createElement('canvas');
+		pps = 4;
+		canvas.width = dur / 1000 * 1.2 * pps | 0;
+		canvas.height = 300;
+		ctx = canvas.getContext('2d');
+
+		dpr = window.devicePixelRatio;
+		timeline(events, 20, 40, 4);
+
+		div.appendChild(canvas);
+
 		logs.appendChild(div);
     }
     </script>
