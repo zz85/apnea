@@ -2,6 +2,7 @@
 started = -1;
 marker = -1;
 currentReps = 0;
+nextAlert = -1;
 
 events = [];
 mode = 'hold';
@@ -112,6 +113,21 @@ function start() {
 
 	instructions.style.display = 'none';
 	toggleButton.innerHTML = 'Stop';
+
+	nextAlert = 30;
+	alerts = window.speechSynthesis ? [
+		new SpeechSynthesisUtterance('30 seconds'),
+		new SpeechSynthesisUtterance('1 minute'),
+		new SpeechSynthesisUtterance('1:30'),
+		new SpeechSynthesisUtterance('2 minute'),
+		new SpeechSynthesisUtterance('2:30'),
+		new SpeechSynthesisUtterance('3 minute'),
+		new SpeechSynthesisUtterance('3:30'),
+		new SpeechSynthesisUtterance('4 minute'),
+		new SpeechSynthesisUtterance('4:30'),
+		new SpeechSynthesisUtterance('5 minute'),
+		new SpeechSynthesisUtterance('5:30'),
+	] : []
 }
 
 function stop() {
@@ -168,6 +184,7 @@ function interval() {
 	const now = Date.now();
 
 	time = now - started
+	
 	seconds = time / 1000 % 60;
 
 	// update canvas
@@ -182,6 +199,11 @@ function interval() {
 	timeline(events);
 
 	if (started < 0) return ctx.restore();
+
+	if (nextAlert <= time / 1000 && window.speechSynthesis && alerts.length) {
+		nextAlert += 30;
+		speechSynthesis.speak(alerts.shift());
+	}
 
 	ctx.strokeStyle = 'yellow'; // '#ddd'; // red
 	ring(radius, seconds / 60);

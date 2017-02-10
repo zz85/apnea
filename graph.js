@@ -1,7 +1,7 @@
-function timeline(te, x=50, y=50, pps) {
+function timeline(te, tx=50, ty=50, pps) {
 	ctx.save();
 	ctx.scale(dpr, dpr);
-	ctx.translate(x, y);
+	ctx.translate(tx, ty);
 	ctx.font = '10px monospace';
 	ctx.lineWidth = 1;
 	ctx.strokeStyle = '#fff';
