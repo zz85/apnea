@@ -43,17 +43,18 @@
     <div id="logs">
     </div>
 	<script>
-    sessions = sessions.map(convert).filter(s => s.time)
-    // console.log('sessions', sessions);
-    // saveToStorage(sessions);
-
+    
 	refresh();
+
 	function refresh() {
 		logs.innerHTML = '';
 		sessions = loadFromStorage();
+		sessions = sessions.map(convert).filter(s => s.time);
 		sessions.forEach(processSession)
-	}
 
+		// console.log('sessions', sessions);
+    	// saveToStorage(sessions);
+	}
 
     function convert(session) {
         if (session instanceof Array) {
@@ -127,7 +128,7 @@
 		canvas = document.createElement('canvas');
 		pps = 4;
 		canvas.width = dur / 1000 * 1.2 * pps | 0;
-		canvas.height = 300;
+		canvas.height = 100;
 		ctx = canvas.getContext('2d');
 
 		dpr = window.devicePixelRatio;
