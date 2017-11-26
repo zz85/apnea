@@ -1,7 +1,7 @@
 // voice alerts
 
 nextAlert = -1;
-INTERVAL = 20 // 5 // 30
+INTERVAL = 17.5 // 20 // 5 // 30
 
 // TODO add deep sounds every second using Audio API
 
@@ -27,7 +27,7 @@ function onSpeechStart() {
     ]
 
     // alerts = ['5', '10', '15']
-    alerts = ['10m', '20m', '30m grab tag and return', '20m', '10m', 'breath!!']
+    alerts = ['10m', '20m', '32m grab tag and return', '20m', '10m', 'breathe!!']
 
     nextAlert = INTERVAL;
 }
