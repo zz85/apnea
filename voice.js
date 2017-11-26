@@ -1,11 +1,13 @@
 // voice alerts
 
 nextAlert = -1;
-INTERVAL = 5 // 5 // 30
+INTERVAL = 20 // 5 // 30
 
 // TODO add deep sounds every second using Audio API
 
 // TODO if no window.speechSynthesis, disable module
+
+// TODO add count down
 
 function onSpeechStart() {
     started = Date.now()
@@ -24,10 +26,10 @@ function onSpeechStart() {
 		'5:30',
     ]
 
-    alerts = ['5', '10', '15']
+    // alerts = ['5', '10', '15']
+    alerts = ['10m', '20m', '30m grab tag and return', '20m', '10m', 'breath!!']
 
-    alerts = alerts.map(text => new SpeechSynthesisUtterance(text))
-    // nextAlert = INTERVAL;
+    nextAlert = INTERVAL;
 }
 
 function onSpeechInterval() {
@@ -37,10 +39,12 @@ function onSpeechInterval() {
     if (nextAlert <= time / 1000 && window.speechSynthesis && alerts.length) {
         nextAlert += INTERVAL;
         text = alerts.shift();
-        speechSynthesis.speak(text);
-        // utterance = new SpeechSynthesisUtterance(text)
-        // console.log(utterance);
-        // speechSynthesis.speak(utterance);
+
+        utterance = new SpeechSynthesisUtterance(text) // 0.05ms
+        console.log(utterance);
+        console.time('utterance')
+        speechSynthesis.speak(utterance); // 0.04ms
+        console.timeEnd('utterance')
         
 	}
 }
