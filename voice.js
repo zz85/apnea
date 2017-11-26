@@ -1,6 +1,5 @@
 // voice alerts
 
-
 // TODO add deep sounds every second using Audio API
 
 // TODO if no window.speechSynthesis, disable module
@@ -34,7 +33,7 @@ function onSpeechStart() {
         'フリーフォール体制に入る準備',
         'そのままじっと体は柔らかく',
         '信じて待つ',
-        'タグを抜いてフッドに挾む',
+        'タグを抜いてフッドに入れて',
         'ゆっくりひいて浮上',
         'ちゃんと息吸って、しっかり呼吸、最後にもうひと呼吸',
         'マスク、ノースクリップ、サイン'
@@ -42,9 +41,9 @@ function onSpeechStart() {
 
     // josh profile
     INTERVAL = 20
-    // alerts = [
-    //     '10m, relax, pull more till freefall', '20m, equalize mask and draw air', '28m. grab your tag', '20m', '10m, prepare for recovery',
-    //     'breathe!! breathe!! breathe! Mask! Sign! Say I\'m  ok']
+    alerts = [
+        '10m, relax, pull till freefall', '20m, equalize mask and draw air', '28m. grab your tag', '20m', '10m, prepare for recovery',
+        'breathe!! breathe!! breathe! Mask! Sign! Say I\'m  ok']
 
     INTERVAL = 2 // debug override
     nextAlert = INTERVAL;
@@ -81,13 +80,14 @@ function onSpeechInterval() {
         utterance = new SpeechSynthesisUtterance(text) // 0.05ms
         // utterance.pitch = pitch
         // utterance.rate
-        utterance.voice = findVoice('Kyoko')
+        utterance.voice = findVoice('Tessa')
+        // Alex, Daniel, Fred, Fiona, Karen, Tessa*, Moira (IE), Samantha(US), Veena - English
+        // Kyoko
 
         console.log(utterance);
         console.time('utterance')
         speechSynthesis.speak(utterance); // 0.04ms
         console.timeEnd('utterance')
-
 	}
 }
 
