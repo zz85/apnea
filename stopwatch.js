@@ -115,8 +115,10 @@ function start() {
 	toggleButton.innerHTML = 'Stop';
 
 	nextAlert = 30;
+
 	alerts = window.speechSynthesis ? [
-		new SpeechSynthesisUtterance('30 seconds'),
+		new SpeechSynthesisUtterance(' '),
+		// new SpeechSynthesisUtterance('30 seconds'),
 		new SpeechSynthesisUtterance('1 minute'),
 		new SpeechSynthesisUtterance('1:30'),
 		new SpeechSynthesisUtterance('2 minute'),
@@ -128,6 +130,32 @@ function start() {
 		new SpeechSynthesisUtterance('5 minute'),
 		new SpeechSynthesisUtterance('5:30'),
 	] : []
+}
+
+
+var voices = window.speechSynthesis.getVoices();
+console.log('voices.length', voices.length);
+var select = document.createElement('select');
+
+for(i = 0; i < voices.length ; i++) {
+  var option = document.createElement('option');
+  option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+  option.setAttribute('data-lang', voices[i].lang);
+  option.setAttribute('data-name', voices[i].name);
+  console.log(voices[i])
+  select.appendChild(option);
+}
+
+document.body.appendChild(select);
+
+function testSound() {
+	
+	beep = new SpeechSynthesisUtterance('beep')
+	// beep.rate = 0.4
+	// beep.volume
+	beep.pitch = 10
+	
+	speechSynthesis.speak(beep);
 }
 
 function stop() {
