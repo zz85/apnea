@@ -116,22 +116,6 @@ function start() {
 	onSpeechStart()
 }
 
-
-var voices = window.speechSynthesis.getVoices();
-console.log('voices.length', voices.length);
-var select = document.createElement('select');
-
-for(i = 0; i < voices.length ; i++) {
-  var option = document.createElement('option');
-  option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
-  option.setAttribute('data-lang', voices[i].lang);
-  option.setAttribute('data-name', voices[i].name);
-  console.log(voices[i])
-  select.appendChild(option);
-}
-
-document.body.appendChild(select);
-
 function testSound() {
 	
 	beep = new SpeechSynthesisUtterance('beep')

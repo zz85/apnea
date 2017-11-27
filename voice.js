@@ -6,6 +6,9 @@
 
 // TODO add count down
 
+let least = 0
+let currentAlertIndex = -1;
+
 function onSpeechStart() {
     started = Date.now()
     alerts = [
@@ -42,11 +45,112 @@ function onSpeechStart() {
     // josh profile
     INTERVAL = 20
     alerts = [
-        '10m, relax, pull till freefall', '20m, equalize mask and draw air', '28m. grab your tag', '20m', '10m, prepare for recovery',
-        'breathe!! breathe!! breathe! Mask! Sign! Say I\'m  ok']
+        '10m, relax, pull till freefall',
+        '20m, equalize mask and draw air',
+        '30m. prepare to grab tag',
+        '20m',
+        '10m, prepare for recovery',
+        'breathe!! breathe!! breathe! Mask! Sign! Say I\'m  ok'
+    ]
 
     INTERVAL = 2 // debug override
     nextAlert = INTERVAL;
+
+    interpretScript(standardCountdown)
+
+    next = alerts[currentAlertIndex++ + 1]
+    nextAlert = next.timeValue + least;
+}
+
+standardCountdown = `
+-2min | 2 minutes
+-1:30 | 1 30
+-1    | 1 minute
+-30s  | 30
+-20s  | 20
+-10s  | 10
+-5    | 5
+-4    | 4
+-3    | 3
+-2    | 2
+-1    | 1
+0     | Official Top
+1     | 1
+2     | 2
+3     | 3
+4     | 4
+5     | 5
+6     | 6
+7     | 7
+8     | 8
+9     | 9
+10    | 10
+20  | 10m, relax, pull till freefall
+40  | 20m, equalize mask and draw air
+55  | 30m. prepare to grab tag
+1:15 |  20m
+1:35 |  10m, prepare for recovery
+1:55 |  breathe!! breathe!! breathe! Mask! Sign! Say I\'m  ok
+`
+
+function interpretScript(text) {
+    const lines = text.split(/\n/)
+    splitter = /(.*)\|(.*)/
+    let timeValue, unit
+
+    alerts = [];
+
+    lines.forEach((line, i) => {
+        split = splitter.exec(line)
+        if (split) {
+            time = split[1].trim();
+            text = split[2].trim();
+
+            [timeValue, unit] = parseTime(time, unit);
+            alerts.push({ timeValue, text })
+            least = Math.min(timeValue, least)
+        }
+    })
+
+    least = least * -1;
+    console.log('least', least);
+}
+
+/**
+ * -2min -> -120
+ * 1:30 -> 90
+ * 
+ * (negation)(value)(units) => timevalue
+ */
+function parseTime(time, unit) {
+    const neg = /(-)(.*)/.exec(time)
+    const isNeg = neg && neg.length === 3;
+    if (isNeg) time = neg[2];
+
+    let mins = /(.*)(m|min|minute|minutes)/.exec(time)
+    let secs = /(.*)(s|seconds)/.exec(time)
+    if (!mins && !secs && unit) {
+        if (unit === 'min') mins = [0, time];
+        if (unit === 's') secs = [0, time]
+    }
+
+    let value
+
+    if (mins) {
+        mins = mins[1].split(':');
+        if (mins.length === 2) {
+            value = mins[0] * 60 + +mins[1]
+        }
+        else {
+            value = mins[0] * 60;
+        }
+    }
+    else {
+        value = +secs[1];
+    }
+
+    if (isNeg) value = -value;
+    return [value, mins ? 'min' : 's'];
 }
 
 function init() {
@@ -63,6 +167,23 @@ function init() {
     else setTimeout(init, 500);
 }
 
+/*
+var voices = window.speechSynthesis.getVoices();
+console.log('voices.length', voices.length);
+var select = document.createElement('select');
+
+for(i = 0; i < voices.length ; i++) {
+  var option = document.createElement('option');
+  option.textContent = voices[i].name + ' (' + voices[i].lang + ')';
+  option.setAttribute('data-lang', voices[i].lang);
+  option.setAttribute('data-name', voices[i].name);
+  console.log(voices[i])
+  select.appendChild(option);
+}
+
+document.body.appendChild(select);
+ */
+
 function findVoice(name) {
     return voices.find(v => {
         return v.name === name
@@ -72,10 +193,24 @@ function findVoice(name) {
 function onSpeechInterval() {
     const now = Date.now();
     time = now - started
+    offsettime = time - least * 1000 // offset
 
-    if (nextAlert <= time / 1000 && window.speechSynthesis && alerts.length) {
-        nextAlert += INTERVAL;
-        text = alerts.shift();
+    // document.body
+    label.innerHTML = format(offsettime);
+
+    if (nextAlert <= time / 1000 && alerts.length) {
+        // nextAlert += INTERVAL;
+        current = alerts[currentAlertIndex]
+        if (!current) return;
+        text = current.text
+        next = alerts[++currentAlertIndex]
+        console.log('current', current, 'next', next)
+        if (next) {
+            nextAlert += next.timeValue - current.timeValue;
+            console.log('nextAlert', nextAlert);
+        }
+
+        
 
         utterance = new SpeechSynthesisUtterance(text) // 0.05ms
         // utterance.pitch = pitch
